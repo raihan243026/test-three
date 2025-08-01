@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun DOM Adventure</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS to handle theme and 3D effects -->
+    <style>
+        :root {
+            --light-bg: #f3f4f6;
+            --light-text: #1f2937;
+            --light-accent: #ef4444;
+            --dark-red-bg: #330000;
+            --dark-red-text: #ffcccc;
+            --dark-red-accent: #cc3333;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s ease;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        body.dark-theme {
+            background-color: var(--dark-red-bg);
+            color: var(--dark-red-text);
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .button-3d-container {
+            perspective: 1000px;
+        }
+
+        .button-3d {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg);
+        }
+        
+        .button-3d:hover {
+            transform: rotateX(15deg) translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-custom {
+            background-color: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background-color 0.5s ease;
+        }
+
+        .dark-theme .navbar-custom {
+            background-color: rgba(51, 0, 0, 0.5);
+        }
+
+        .card-custom {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: background-color 0.5s ease;
+        }
+
+        .dark-theme .card-custom {
+            background-color: rgba(51, 0, 0, 0.8);
+        }
+
+        .dark-theme .text-body-emphasis,
+        .dark-theme h1, .dark-theme p, .dark-theme a {
+            color: var(--dark-red-text) !important;
+        }
+        
+        .dark-theme .btn-danger {
+            background-color: var(--dark-red-accent) !important;
+            border-color: var(--dark-red-accent) !important;
+        }
+
+        #secret-message-card {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        #secret-message-card:hover {
+            transform: scale(1.05);
+        }
+
+        #surpriseMessageContainer {
+            min-height: 50px; /* Prevent layout shift */
+        }
+
+        .spinner-border {
+            width: 2rem;
+            height: 2rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Main Content -->
+    <main class="container-fluid d-flex flex-column justify-content-center align-items-center flex-grow-1 p-4 position-relative z-10">
+        <!-- Theme Switcher Button -->
+        <button id="theme-switcher" class="btn btn-danger position-absolute top-0 end-0 m-3 rounded-circle" style="width: 40px; height: 40px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon text-white">
+                <path d="M12 3a6.364 6.364 0 0 0 9 9 3.5 3.5 0 1 1-3.5-3.5 6.364 6.364 0 0 0-5.5-5.5z"/>
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun text-white d-none">
+                <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m4.93 19.07 1.41-1.41"/><path d="m17.66 6.34 1.41-1.41"/>
+            </svg>
+        </button>
+
+        <!-- Nav bar -->
+        <nav class="navbar-custom w-100 max-w-4xl mx-auto rounded-3 shadow-lg mb-5 p-3">
+            <div class="container-fluid d-flex justify-content-center gap-3">
+                <a href="#home" class="text-decoration-none text-body-emphasis fs-5 fw-semibold">Explore Home</a>
+                <a href="#about" class="text-decoration-none text-body-emphasis fs-5 fw-semibold">Discover More</a>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      More Adventures
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Gallery</a></li>
+                      <li><a class="dropdown-item" href="#">Fun Facts</a></li>
+                      <li><a class="dropdown-item" href="#">Quizzes</a></li>
+                    </ul>
+                  </div>
+            </div>
+        </nav>
+
+        <!-- Content Section -->
+        <div class="card card-custom p-5 w-100 max-w-4xl shadow-lg rounded-4 text-center mb-4">
+            <h1 class="display-3 fw-bold mb-4">Embark on a Fun Journey!</h1>
+            <p id="myText" class="fs-5 text-body-secondary mb-4">Welcome to our vibrant world! Click the button below to unleash a surprise message from a large language model.</p>
+            <div class="button-3d-container">
+                <button id="magic-button" class="btn btn-danger btn-lg rounded-pill shadow-lg button-3d">Unleash a Surprise!</button>
+            </div>
+            <div id="surpriseMessageContainer" class="mt-4 p-3 border rounded">
+                <p id="surpriseMessage" class="m-0"></p>
+            </div>
+        </div>
+
+        <!-- Another Interactive Card -->
+        <div id="secret-message-card" class="card card-custom p-4 w-100 max-w-4xl shadow-lg rounded-4 text-center mt-4">
+            <h2 class="h4 mb-2">Click to Reveal a Secret!</h2>
+            <div id="secret-content" class="collapse">
+                <p>You are a true adventurer!</p>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button id="reset-button" class="btn btn-outline-danger">Reset Page</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="navbar-custom w-100 p-3 shadow-sm mt-auto">
+        <div class="container-fluid d-flex justify-content-center gap-4">
+            <a href="https://facebook.com" class="text-decoration-none text-body-emphasis fs-6">Join Our Facebook Party</a>
+            <a href="https://twitter.com" class="text-decoration-none text-body-emphasis fs-6">Tweet With Us</a>
+            <a href="https://instagram.com" class="text-decoration-none text-body-emphasis fs-6">Snap on Instagram</a>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Three.js and Tone.js for 3D graphics and sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <script>
+        // === 3D Particle Animation with Three.js ===
+        let scene, camera, renderer, particles, particleCount, particlesGeometry;
+
+        function init3D() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Particle system
+            particleCount = 500;
+            particlesGeometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const color = new THREE.Color();
+
+            for (let i = 0; i < particleCount; i++) {
+                // positions
+                const x = (Math.random() - 0.5) * 10;
+                const y = (Math.random() - 0.5) * 10;
+                const z = (Math.random() - 0.5) * 10;
+                positions.push(x, y, z);
+                
+                // colors
+                color.setHSL(Math.random(), 1.0, 0.5);
+                colors.push(color.r, color.g, color.b);
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            particlesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({ 
+                size: 0.05,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                transparent: true
+            });
+            particles = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particles);
+
+            camera.position.z = 5;
+            
+            window.addEventListener('resize', onWindowResize, false);
+            animateParticles();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animateParticles() {
+            requestAnimationFrame(animateParticles);
+
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.0005;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // === Gemini API Integration and DOM Manipulation ===
+        const themeSwitcher = document.getElementById('theme-switcher');
+        const magicButton = document.getElementById('magic-button');
+        const myText = document.getElementById('myText');
+        const surpriseMessage = document.getElementById('surpriseMessage');
+        const body = document.body;
+        const secretCard = document.getElementById('secret-message-card');
+        const secretContent = document.getElementById('secret-content');
+        const resetButton = document.getElementById('reset-button');
+        const initialText = "Welcome to our vibrant world! Click the button below to unleash a surprise message from a large language model.";
+        let isDarkTheme = false;
+
+        // Sound effect setup
+        const synth = new Tone.Synth().toDestination();
+
+        themeSwitcher.addEventListener('click', () => {
+            isDarkTheme = !isDarkTheme;
+            if (isDarkTheme) {
+                body.classList.add('dark-theme');
+            } else {
+                body.classList.remove('dark-theme');
+            }
+        });
+
+        magicButton.addEventListener('click', async () => {
+            surpriseMessage.innerHTML = '<div class="spinner-border text-danger" role="status"><span class="visually-hidden">Loading...</span></div>';
+            
+            // Play a sound
+            synth.triggerAttackRelease("C4", "8n");
+
+            const prompt = "Generate a short, fun, and surprising fact or message. Something like 'Did you know...' or 'A hidden truth about...'";
+
+            // Exponential backoff for API calls
+            let retries = 0;
+            const maxRetries = 5;
+            const baseDelay = 1000; // 1 second
+
+            while (retries < maxRetries) {
+                try {
+                    const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                    const payload = { contents: chatHistory };
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.status === 429) {
+                        retries++;
+                        const delay = baseDelay * Math.pow(2, retries);
+                        console.warn(`API call limit reached. Retrying in ${delay / 1000} seconds...`);
+                        await new Promise(res => setTimeout(res, delay));
+                        continue;
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        surpriseMessage.innerText = text;
+                        surpriseMessage.style.color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+                        myText.innerText = "Here's your surprise!";
+                    } else {
+                        surpriseMessage.innerText = "Failed to get a surprise message. Please try again.";
+                    }
+                    break; // Success, exit loop
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    surpriseMessage.innerText = "An error occurred. Please try again.";
+                    break;
+                }
+            }
+        });
+
+        // Toggle the secret message card
+        secretCard.addEventListener('click', () => {
+            const bsCollapse = new bootstrap.Collapse(secretContent, {
+                toggle: true
+            });
+        });
+
+        // Reset the page to its initial state
+        resetButton.addEventListener('click', () => {
+            body.classList.remove('dark-theme');
+            myText.innerText = initialText;
+            surpriseMessage.innerText = "";
+            myText.style.color = "";
+        });
+
+        // Initialize 3D on window load
+        window.onload = function() {
+            init3D();
+        };
+    </script>
+</body>
+</html>
